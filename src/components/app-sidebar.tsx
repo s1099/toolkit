@@ -9,8 +9,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { FileText, Image, Settings, Users } from "lucide-react";
+import { NavLink } from "react-router";
+import { ThemeToggle } from "./theme-toggle";
 
-interface SidebarGroup {
+interface NavSection {
   label: string;
   items: {
     title: string;
@@ -19,33 +21,33 @@ interface SidebarGroup {
   }[];
 }
 
-const groups: SidebarGroup[] = [
+const groups: NavSection[] = [
   {
     label: "Image",
     items: [
       {
         title: "OCR",
-        url: "/ocr",
+        url: "/image/ocr",
         icon: FileText,
       },
       {
         title: "Upscale",
-        url: "/upscale",
+        url: "/image/upscale",
         icon: Image,
       },
     ],
   },
   {
-    label: "Test",
+    label: "test",
     items: [
       {
-        title: "a",
-        url: "/a",
+        title: "A",
+        url: "/A",
         icon: Users,
       },
       {
-        title: "b",
-        url: "/b",
+        title: "B",
+        url: "/B",
         icon: Settings,
       },
     ],
@@ -64,10 +66,10 @@ export function AppSidebar() {
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <a href={item.url}>
+                      <NavLink to={item.url}>
                         <item.icon />
                         <span>{item.title}</span>
-                      </a>
+                      </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -75,6 +77,7 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+        <ThemeToggle />
       </SidebarContent>
     </Sidebar>
   );
