@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/sidebar";
 import { FileText, Image, Settings, Users } from "lucide-react";
 import { NavLink } from "react-router";
-import { ThemeToggle } from "./theme-toggle";
 
 interface NavSection {
   label: string;
@@ -77,7 +76,6 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
-        <ThemeToggle />
       </SidebarContent>
     </Sidebar>
   );

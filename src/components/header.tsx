@@ -3,11 +3,11 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Header() {
   return (
@@ -31,6 +31,9 @@ export function Header() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
+      </div>
+      <div className="ml-auto flex items-center gap-2 px-4">
+        <ThemeToggle />
       </div>
     </header>
   );
