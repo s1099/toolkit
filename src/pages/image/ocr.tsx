@@ -49,10 +49,14 @@ export function ImageOcr() {
                 <Label htmlFor="ocr-model">Model</Label>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button id="ocr-model" variant="outline" className="min-w-48 justify-between">
+                    <Button
+                      id="ocr-model"
+                      variant="outline"
+                      className="min-w-48 justify-between"
+                    >
                       <span>
-                        {modelOptions.find((m) => m.value === selectedModel)?.label ??
-                          selectedModel}
+                        {modelOptions.find((m) => m.value === selectedModel)
+                          ?.label ?? selectedModel}
                       </span>
                       <ChevronDown className="size-4 opacity-70" />
                     </Button>
@@ -77,7 +81,9 @@ export function ImageOcr() {
           <Card>
             <CardHeader>
               <CardTitle>Upload Image</CardTitle>
-              <CardDescription>Drag and drop or browse to upload.</CardDescription>
+              <CardDescription>
+                Drag and drop or browse to upload.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <FileUpload
@@ -91,8 +97,12 @@ export function ImageOcr() {
                     <div className="flex items-center justify-center rounded-full border p-2.5">
                       <Upload className="size-6 text-muted-foreground" />
                     </div>
-                    <p className="font-medium text-sm">Drag & drop files here</p>
-                    <p className="text-muted-foreground text-xs">Or click to browse</p>
+                    <p className="font-medium text-sm">
+                      Drag & drop files here
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      Or click to browse
+                    </p>
                   </div>
                   <FileUploadTrigger asChild>
                     <Button variant="outline" size="sm" className="mt-2 w-fit">
