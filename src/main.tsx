@@ -6,8 +6,7 @@ import "./index.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {/* TODO: use env var to set base path */}
-    <BrowserRouter basename="/toolkit">
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AppRouter />
     </BrowserRouter>
   </StrictMode>

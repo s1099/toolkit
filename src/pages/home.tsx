@@ -1,7 +1,19 @@
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+
 export function Home() {
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">/</h1>
+      <h1 className="text-2xl font-bold mb-4">Toolkit</h1>
+      <div>
+        {/* TODO: fix description text color (too light) */}
+        <Button
+          variant="outline"
+          onClick={() => toast(":3", { description: ":3" })}
+        >
+          Toast
+        </Button>
+      </div>
     </div>
   );
 }

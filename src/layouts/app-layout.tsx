@@ -3,6 +3,7 @@ import { ThemeProvider } from "../providers/theme-provider";
 import { SidebarInset, SidebarProvider } from "../components/ui/sidebar";
 import { AppSidebar } from "../components/app-sidebar";
 import { Header } from "../components/header";
+import { Toaster } from "@/components/ui/sonner";
 
 export function AppLayout() {
   return (
@@ -13,6 +14,7 @@ export function AppLayout() {
           <Header />
           <main>
             <Outlet />
+            <Toaster position="top-center" />
           </main>
         </SidebarInset>
       </SidebarProvider>
