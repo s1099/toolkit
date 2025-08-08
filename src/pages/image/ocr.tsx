@@ -26,7 +26,7 @@ export function ImageOcr() {
           <ModelSelectCard
             id="ocr-model"
             title="Model"
-            description="Choose an OCR model."
+            description="Choose and manage OCR model."
             selected={selectedModel}
             onChange={setSelectedModel}
             options={modelOptions}

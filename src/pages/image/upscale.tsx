@@ -60,7 +60,7 @@ export function ImageUpscale() {
           <ModelSelectCard
             id="upscale-model"
             title="Model"
-            description="Choose an upscaling model."
+            description="Choose upscaling model"
             selected={selectedModel}
             onChange={setSelectedModel}
             options={modelOptions}
