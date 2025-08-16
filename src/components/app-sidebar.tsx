@@ -1,4 +1,12 @@
 import {
+  FileText,
+  ImageMinus,
+  Maximize,
+  Mic,
+  Volume2,
+} from "lucide-react";
+import { NavLink } from "react-router";
+import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -8,8 +16,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { FileText, Image, Settings, Users } from "lucide-react";
-import { NavLink } from "react-router";
 
 interface NavSection {
   label: string;
@@ -30,24 +36,39 @@ const groups: NavSection[] = [
         icon: FileText,
       },
       {
+        title: "Remove Background",
+        url: "/image/remove-bg",
+        icon: ImageMinus,
+      },
+      {
         title: "Upscale",
         url: "/image/upscale",
-        icon: Image,
+        icon: Maximize,
       },
     ],
   },
   {
-    label: "test",
+    label: "Audio",
     items: [
       {
-        title: "A",
-        url: "/A",
-        icon: Users,
+        title: "Transcribe",
+        url: "/audio/transcribe",
+        icon: Mic,
       },
       {
-        title: "B",
-        url: "/B",
-        icon: Settings,
+        title: "TTS",
+        url: "/audio/tts",
+        icon: Volume2,
+      },
+    ],
+  },
+  {
+    label: "Text",
+    items: [
+      {
+        title: "Summarize",
+        url: "/text/summarize",
+        icon: FileText,
       },
     ],
   },

@@ -93,5 +93,3 @@ export async function listModels(): Promise<string[]> {
   db.close()
   return keys
 }
-
-

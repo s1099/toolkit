@@ -1,21 +1,42 @@
 import { useState } from "react";
 import { FileUploadCard } from "@/components/image/file-upload-card";
-import {
-  type ModelOption,
-  ModelSelectCard,
-} from "@/components/image/model-select-card";
+import { type Model, ModelPicker } from "@/components/image/model-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function ImageOcr() {
   const [files, setFiles] = useState<File[]>([]);
-  const [selectedModel, setSelectedModel] = useState<string>("tesseract-fast");
+  const [activeModel, setActiveModel] = useState<string>("tesseract-fast");
   const [ocrText] = useState<string>("");
 
-  const modelOptions: ModelOption[] = [
-    { value: "tesseract-fast", label: "Tesseract Fast" },
-    { value: "tesseract-legacy", label: "Tesseract Legacy" },
-    { value: "easy-ocr", label: "EasyOCR" },
-    { value: "paddle-ocr", label: "PaddleOCR" },
+  const models: Model[] = [
+    {
+      id: "tesseract-fast",
+      name: "Tesseract Fast",
+      size: "2.1 GB",
+      status: "available",
+      description: "Fast OCR model",
+    },
+    {
+      id: "tesseract-legacy",
+      name: "Tesseract Legacy",
+      size: "1.8 GB",
+      status: "available",
+      description: "Legacy OCR model",
+    },
+    {
+      id: "easy-ocr",
+      name: "EasyOCR",
+      size: "4.7 GB",
+      status: "available",
+      description: "Open source OCR model",
+    },
+    {
+      id: "paddle-ocr",
+      name: "PaddleOCR",
+      size: "1.2 GB",
+      status: "available",
+      description: "PaddleOCR OCR model",
+    },
   ];
 
   return (
@@ -23,13 +44,9 @@ export function ImageOcr() {
       <h1 className="text-2xl font-bold mb-4">OCR</h1>
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-6">
-          <ModelSelectCard
-            id="ocr-model"
-            title="Model"
-            description="Choose and manage OCR model."
-            selected={selectedModel}
-            onChange={setSelectedModel}
-            options={modelOptions}
+          <ModelPicker
+            {...{ activeModel, setActiveModel }}
+            availableModels={models}
           />
 
           <FileUploadCard
