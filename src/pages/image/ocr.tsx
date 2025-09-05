@@ -51,7 +51,6 @@ export function ImageOcr() {
 
           <FileUploadCard
             title="Upload Image"
-            description="Drag and drop or browse to upload."
             files={files}
             onFilesChange={setFiles}
             accept="image/*"

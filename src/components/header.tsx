@@ -21,9 +21,7 @@ export function Header() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
-              {/* <BreadcrumbLink href="/"> */}
               Image
-              {/* </BreadcrumbLink> */}
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>

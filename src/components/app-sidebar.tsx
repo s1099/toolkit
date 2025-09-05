@@ -1,11 +1,4 @@
-import {
-  FileText,
-  ImageMinus,
-  Maximize,
-  Mic,
-  ToolCaseIcon,
-  Volume2,
-} from "lucide-react";
+import { ToolCaseIcon } from "lucide-react";
 import { NavLink } from "react-router";
 import {
   Sidebar,
@@ -18,63 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-
-interface NavSection {
-  label: string;
-  items: {
-    title: string;
-    url: string;
-    icon: React.ElementType;
-  }[];
-}
-
-const groups: NavSection[] = [
-  {
-    label: "Image",
-    items: [
-      {
-        title: "OCR",
-        url: "/image/ocr",
-        icon: FileText,
-      },
-      {
-        title: "Remove Background",
-        url: "/image/remove-bg",
-        icon: ImageMinus,
-      },
-      {
-        title: "Upscale",
-        url: "/image/upscale",
-        icon: Maximize,
-      },
-    ],
-  },
-  {
-    label: "Audio",
-    items: [
-      {
-        title: "Transcribe",
-        url: "/audio/transcribe",
-        icon: Mic,
-      },
-      {
-        title: "TTS",
-        url: "/audio/tts",
-        icon: Volume2,
-      },
-    ],
-  },
-  {
-    label: "Text",
-    items: [
-      {
-        title: "Summarize",
-        url: "/text/summarize",
-        icon: FileText,
-      },
-    ],
-  },
-];
+import { navGroups } from "@/lib/navigation";
 
 export function AppSidebar() {
   return (
@@ -95,7 +32,7 @@ export function AppSidebar() {
         </NavLink>
       </SidebarHeader>
       <SidebarContent>
-        {groups.map((group) => (
+        {navGroups.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -103,7 +40,9 @@ export function AppSidebar() {
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild tooltip={item.title}>
-                      <NavLink to={item.url}>
+                      <NavLink
+                        to={`/${group.label.toLowerCase()}/${item.slug}`}
+                      >
                         <item.icon />
                         <span>{item.title}</span>
                       </NavLink>

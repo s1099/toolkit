@@ -15,7 +15,7 @@ import {
 
 type FileUploadCardProps = {
   title: string;
-  description: string;
+  description?: string;
   files: File[];
   onFilesChange: (files: File[]) => void;
   accept?: string;
