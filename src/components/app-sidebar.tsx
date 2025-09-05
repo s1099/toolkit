@@ -3,6 +3,7 @@ import {
   ImageMinus,
   Maximize,
   Mic,
+  ToolCaseIcon,
   Volume2,
 } from "lucide-react";
 import { NavLink } from "react-router";
@@ -12,6 +13,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -76,7 +78,22 @@ const groups: NavSection[] = [
 
 export function AppSidebar() {
   return (
-    <Sidebar variant="inset">
+    <Sidebar variant="inset" collapsible="icon">
+      <SidebarHeader>
+        <NavLink to="/">
+          <SidebarMenuButton
+            size="lg"
+            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+          >
+            <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+              <ToolCaseIcon />
+            </div>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-medium">Toolkit</span>
+            </div>
+          </SidebarMenuButton>
+        </NavLink>
+      </SidebarHeader>
       <SidebarContent>
         {groups.map((group) => (
           <SidebarGroup key={group.label}>
@@ -85,7 +102,7 @@ export function AppSidebar() {
               <SidebarMenu>
                 {group.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
+                    <SidebarMenuButton asChild tooltip={item.title}>
                       <NavLink to={item.url}>
                         <item.icon />
                         <span>{item.title}</span>

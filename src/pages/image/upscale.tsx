@@ -33,6 +33,7 @@ export function ImageUpscale() {
     if (!originalUrl) return;
     setIsProcessing(Boolean(activeModel));
     setUpscaledUrl(null);
+    // TODO: actually upscale the image
     const timer = window.setTimeout(() => {
       setUpscaledUrl(originalUrl);
       setIsProcessing(false);
