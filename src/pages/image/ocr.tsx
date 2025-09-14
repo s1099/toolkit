@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FileUploadCard } from "@/components/image/file-upload-card";
-import { type Model, ModelPicker } from "@/components/image/model-select";
+import { type Model, ModelPicker } from "@/components/model-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function ImageOcr() {

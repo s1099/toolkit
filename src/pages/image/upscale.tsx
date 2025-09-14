@@ -2,7 +2,7 @@ import { Download, Image as ImageIcon, Wand2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { BeforeAfterSlider } from "@/components/image/before-after-slider";
 import { FileUploadCard } from "@/components/image/file-upload-card";
-import { type Model, ModelPicker } from "@/components/image/model-select";
+import { type Model, ModelPicker } from "@/components/model-select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 

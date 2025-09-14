@@ -12,6 +12,7 @@ import {
   ImageOcr,
   ImageRemoveBg,
   ImageUpscale,
+  ShaderPlayground,
   TextSummarize,
 } from "../pages";
 
@@ -84,7 +85,7 @@ export const navGroups: RouteGroup[] = [
         title: "Shader Playground",
         slug: "shader-playground",
         icon: BoxIcon,
-        element: TextSummarize,
+        element: ShaderPlayground,
       },
     ],
   },
