@@ -1,4 +1,11 @@
-import { FileText, ImageMinus, Maximize, Mic, Volume2 } from "lucide-react";
+import {
+  BoxIcon,
+  FileTextIcon,
+  ImageMinusIcon,
+  MaximizeIcon,
+  MicIcon,
+  Volume2Icon,
+} from "lucide-react";
 import {
   AudioTranscribe,
   AudioTts,
@@ -25,19 +32,19 @@ export const navGroups: RouteGroup[] = [
       {
         title: "OCR",
         slug: "ocr",
-        icon: FileText,
+        icon: FileTextIcon,
         element: ImageOcr,
       },
       {
         title: "Remove Background",
         slug: "remove-bg",
-        icon: ImageMinus,
+        icon: ImageMinusIcon,
         element: ImageRemoveBg,
       },
       {
         title: "Upscale",
         slug: "upscale",
-        icon: Maximize,
+        icon: MaximizeIcon,
         element: ImageUpscale,
       },
     ],
@@ -48,13 +55,13 @@ export const navGroups: RouteGroup[] = [
       {
         title: "Transcribe",
         slug: "transcribe",
-        icon: Mic,
+        icon: MicIcon,
         element: AudioTranscribe,
       },
       {
         title: "TTS",
         slug: "tts",
-        icon: Volume2,
+        icon: Volume2Icon,
         element: AudioTts,
       },
     ],
@@ -65,7 +72,18 @@ export const navGroups: RouteGroup[] = [
       {
         title: "Summarize",
         slug: "summarize",
-        icon: FileText,
+        icon: FileTextIcon,
+        element: TextSummarize,
+      },
+    ],
+  },
+  {
+    label: "Misc",
+    items: [
+      {
+        title: "Shader Playground",
+        slug: "shader-playground",
+        icon: BoxIcon,
         element: TextSummarize,
       },
     ],

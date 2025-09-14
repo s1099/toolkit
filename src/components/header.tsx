@@ -1,3 +1,4 @@
+import { SidebarTrigger } from "@/components/animate-ui/components/radix/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Breadcrumb,
@@ -7,7 +8,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export function Header() {
   return (
@@ -20,9 +20,7 @@ export function Header() {
         />
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem className="hidden md:block">
-              Image
-            </BreadcrumbItem>
+            <BreadcrumbItem className="hidden md:block">Image</BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>
               <BreadcrumbPage>OCR</BreadcrumbPage>
