@@ -43,32 +43,18 @@ export function ImageUpscale() {
 
   const models: Model[] = [
     {
-      id: "realesrgan-4x",
-      name: "Real-ESRGAN 4x",
-      size: "3.4 GB",
+      id: "test",
+      name: "Test",
+      size: "3.4 MB",
       status: "available",
-      description: "Real-ESRGAN 4x upscaling model",
+      description: "abcd",
     },
     {
-      id: "swinir-4x",
-      name: "SwinIR 4x",
-      size: "4.1 GB",
+      id: "test2",
+      name: "Test 2",
+      size: "4.1 MB",
       status: "available",
-      description: "SwinIR 4x upscaling model",
-    },
-    {
-      id: "esrgan-anime-4x",
-      name: "ESRGAN Anime 4x",
-      size: "2.8 GB",
-      status: "available",
-      description: "ESRGAN Anime 4x upscaling model",
-    },
-    {
-      id: "waifu2x-2x",
-      name: "Waifu2x 2x",
-      size: "1.6 GB",
-      status: "available",
-      description: "Waifu2x 2x upscaling model",
+      description: "abcd",
     },
   ];
 

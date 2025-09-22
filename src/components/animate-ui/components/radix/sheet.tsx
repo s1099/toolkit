@@ -1,28 +1,26 @@
-import * as React from 'react';
-
+import { XIcon } from "lucide-react";
 import {
-  Sheet as SheetPrimitive,
-  SheetTrigger as SheetTriggerPrimitive,
-  SheetOverlay as SheetOverlayPrimitive,
   SheetClose as SheetClosePrimitive,
-  SheetPortal as SheetPortalPrimitive,
-  SheetContent as SheetContentPrimitive,
-  SheetHeader as SheetHeaderPrimitive,
-  SheetFooter as SheetFooterPrimitive,
-  SheetTitle as SheetTitlePrimitive,
-  SheetDescription as SheetDescriptionPrimitive,
-  type SheetProps as SheetPrimitiveProps,
-  type SheetTriggerProps as SheetTriggerPrimitiveProps,
-  type SheetOverlayProps as SheetOverlayPrimitiveProps,
   type SheetCloseProps as SheetClosePrimitiveProps,
+  SheetContent as SheetContentPrimitive,
   type SheetContentProps as SheetContentPrimitiveProps,
-  type SheetHeaderProps as SheetHeaderPrimitiveProps,
-  type SheetFooterProps as SheetFooterPrimitiveProps,
-  type SheetTitleProps as SheetTitlePrimitiveProps,
+  SheetDescription as SheetDescriptionPrimitive,
   type SheetDescriptionProps as SheetDescriptionPrimitiveProps,
-} from '@/components/animate-ui/primitives/radix/sheet';
-import { cn } from '@/lib/utils';
-import { XIcon } from 'lucide-react';
+  SheetFooter as SheetFooterPrimitive,
+  type SheetFooterProps as SheetFooterPrimitiveProps,
+  SheetHeader as SheetHeaderPrimitive,
+  type SheetHeaderProps as SheetHeaderPrimitiveProps,
+  SheetOverlay as SheetOverlayPrimitive,
+  type SheetOverlayProps as SheetOverlayPrimitiveProps,
+  SheetPortal as SheetPortalPrimitive,
+  Sheet as SheetPrimitive,
+  type SheetProps as SheetPrimitiveProps,
+  SheetTitle as SheetTitlePrimitive,
+  type SheetTitleProps as SheetTitlePrimitiveProps,
+  SheetTrigger as SheetTriggerPrimitive,
+  type SheetTriggerProps as SheetTriggerPrimitiveProps,
+} from "@/components/animate-ui/primitives/radix/sheet";
+import { cn } from "@/lib/utils";
 
 type SheetProps = SheetPrimitiveProps;
 
@@ -41,7 +39,7 @@ type SheetOverlayProps = SheetOverlayPrimitiveProps;
 function SheetOverlay({ className, ...props }: SheetOverlayProps) {
   return (
     <SheetOverlayPrimitive
-      className={cn('fixed inset-0 z-50 bg-black/50', className)}
+      className={cn("fixed inset-0 z-50 bg-black/50", className)}
       {...props}
     />
   );
@@ -60,7 +58,7 @@ type SheetContentProps = SheetContentPrimitiveProps & {
 function SheetContent({
   className,
   children,
-  side = 'right',
+  side = "right",
   showCloseButton = true,
   ...props
 }: SheetContentProps) {
@@ -69,12 +67,12 @@ function SheetContent({
       <SheetOverlay />
       <SheetContentPrimitive
         className={cn(
-          'bg-background fixed z-50 flex flex-col gap-4 shadow-lg',
-          side === 'right' && 'h-full w-[350px] border-l',
-          side === 'left' && 'h-full w-[350px] border-r',
-          side === 'top' && 'w-full h-[350px] border-b',
-          side === 'bottom' && 'w-full h-[350px] border-t',
-          className,
+          "bg-background fixed z-50 flex flex-col gap-4 shadow-lg",
+          side === "right" && "h-full w-[350px] border-l",
+          side === "left" && "h-full w-[350px] border-r",
+          side === "top" && "w-full h-[350px] border-b",
+          side === "bottom" && "w-full h-[350px] border-t",
+          className
         )}
         {...props}
       >
@@ -95,7 +93,7 @@ type SheetHeaderProps = SheetHeaderPrimitiveProps;
 function SheetHeader({ className, ...props }: SheetHeaderProps) {
   return (
     <SheetHeaderPrimitive
-      className={cn('flex flex-col gap-1.5 p-4', className)}
+      className={cn("flex flex-col gap-1.5 p-4", className)}
       {...props}
     />
   );
@@ -106,7 +104,7 @@ type SheetFooterProps = SheetFooterPrimitiveProps;
 function SheetFooter({ className, ...props }: SheetFooterProps) {
   return (
     <SheetFooterPrimitive
-      className={cn('mt-auto flex flex-col gap-2 p-4', className)}
+      className={cn("mt-auto flex flex-col gap-2 p-4", className)}
       {...props}
     />
   );
@@ -117,7 +115,7 @@ type SheetTitleProps = SheetTitlePrimitiveProps;
 function SheetTitle({ className, ...props }: SheetTitleProps) {
   return (
     <SheetTitlePrimitive
-      className={cn('text-foreground font-semibold', className)}
+      className={cn("text-foreground font-semibold", className)}
       {...props}
     />
   );
@@ -128,7 +126,7 @@ type SheetDescriptionProps = SheetDescriptionPrimitiveProps;
 function SheetDescription({ className, ...props }: SheetDescriptionProps) {
   return (
     <SheetDescriptionPrimitive
-      className={cn('text-muted-foreground text-sm', className)}
+      className={cn("text-muted-foreground text-sm", className)}
       {...props}
     />
   );
