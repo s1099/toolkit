@@ -15,7 +15,7 @@ import { navGroups } from "@/lib/navigation";
 
 export function AppSidebar() {
   return (
-    <Sidebar variant="inset" collapsible="icon">
+    <Sidebar variant="inset" collapsible="icon" side="left">
       <SidebarHeader>
         <NavLink to="/">
           <SidebarMenuButton
