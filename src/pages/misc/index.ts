@@ -1,1 +1,0 @@
-export { ShaderPlayground } from "./shader-playground";
