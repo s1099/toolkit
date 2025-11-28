@@ -26,15 +26,20 @@ export const navGroups: RouteGroup[] = [
         icon: FileTextIcon,
       },
       {
-        title: "Remove Background",
-        slug: "remove-bg",
-        icon: ImageMinusIcon,
-      },
-      {
         title: "Upscale",
         slug: "upscale",
         icon: MaximizeIcon,
       },
+      {
+        title: "Remove Background",
+        slug: "remove-bg",
+        icon: ImageMinusIcon,
+      },
+      // {
+      //   title: "Remove Watermark",
+      //   slug: "remove-watermark",
+      //   icon: SparklesIcon,
+      // },
     ],
   },
   {

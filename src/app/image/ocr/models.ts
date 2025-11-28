@@ -95,10 +95,25 @@ async function trOCRProcessor(): Promise<OCRProcessor> {
   };
 }
 
+async function paddleOCRProcessor(): Promise<OCRProcessor> {
+  // @ts-expect-error
+  const ocr = await import("@paddlejs-models/ocr");
+
+  return async (imageUrl: string): Promise<string> => {
+    await ocr.init();
+    const result = await ocr.recognize(imageUrl);
+    return result.text.trim();
+  };
+}
+
 export const MODELS: OCRModel[] = [
   {
     name: "Tesseract (Fast, Low Accuracy)",
     processor: tesseractProcessor,
+  },
+  {
+    name: "PaddleOCR (Fast, High Accuracy)",
+    processor: paddleOCRProcessor,
   },
   // {
   //   name: "TrOCR (Slow, High Accuracy)",
