@@ -1,6 +1,6 @@
-// import { pipeline } from "@xenova/transformers";
+import { pipeline } from "@huggingface/transformers";
 
-export type OCRProcessor = (imageFile: File | string) => Promise<string>;
+export type OCRProcessor = (imageUrl: string) => Promise<string>;
 
 export type OCRModel = {
   name: string;
@@ -11,7 +11,7 @@ type TesseractWorker = {
   setParameters: (parameters: {
     tessedit_char_whitelist: string;
   }) => Promise<void>;
-  recognize: (image: File | string) => Promise<{ data: { text: string } }>;
+  recognize: (image: string) => Promise<{ data: { text: string } }>;
 };
 
 type Tesseract = {
@@ -52,7 +52,7 @@ function loadTesseractFromCDN(): Promise<Tesseract> {
   });
 }
 
-async function createTesseractProcessor(): Promise<OCRProcessor> {
+async function tesseractProcessor(): Promise<OCRProcessor> {
   const tesseractLib = await loadTesseractFromCDN();
   const { createWorker } = tesseractLib;
 
@@ -60,62 +60,48 @@ async function createTesseractProcessor(): Promise<OCRProcessor> {
     langPath: "https://tessdata.projectnaptha.com/4.0.0_best",
   });
 
-  await worker.setParameters({
-    tessedit_char_whitelist:
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.",
-  });
-
-  return async (imageFile: File | string): Promise<string> => {
+  return async (imageUrl: string): Promise<string> => {
     const {
       data: { text },
-    } = await worker.recognize(imageFile);
+    } = await worker.recognize(imageUrl);
     return text.trim();
   };
 }
 
-// async function createTrOCRProcessor(): Promise<OCRProcessor> {
-//   const ocr = await pipeline("image-to-text", "Xenova/trocr-small-printed");
+async function trOCRProcessor(): Promise<OCRProcessor> {
+  const ocr = await pipeline("image-to-text", "Xenova/trocr-small-printed");
 
-//   return async (imageFile: File | string): Promise<string> => {
-//     let imageInput: string;
+  return async (imageUrl: string): Promise<string> => {
+    const result = await ocr(imageUrl);
+    const output: unknown = Array.isArray(result) ? result[0] : result;
 
-//     if (imageFile instanceof File) {
-//       imageInput = URL.createObjectURL(imageFile);
-//     } else {
-//       imageInput = imageFile;
-//     }
+    if (typeof output === "string") {
+      return output.trim();
+    }
 
-//     try {
-//       const result = await ocr(imageInput);
-//       const output = Array.isArray(result) ? result[0] : result;
-//       if (typeof output === "string") {
-//         return (output as string).trim();
-//       }
-//       if (output && typeof output === "object") {
-//         let text = "";
-//         if ("generated_text" in output) {
-//           text = (output as { generated_text: string }).generated_text;
-//         } else if ("text" in output) {
-//           text = (output as { text: string }).text;
-//         }
-//         return text.trim();
-//       }
-//       return "";
-//     } finally {
-//       if (imageFile instanceof File && imageInput.startsWith("blob:")) {
-//         URL.revokeObjectURL(imageInput);
-//       }
-//     }
-//   };
-// }
+    // Handle object output
+    if (output && typeof output === "object" && output !== null) {
+      const outputObj = output as Record<string, unknown>;
+      let text = "";
+      if ("generated_text" in outputObj) {
+        text = String(outputObj.generated_text);
+      } else if ("text" in outputObj) {
+        text = String(outputObj.text);
+      }
+      return text.trim();
+    }
+
+    return "";
+  };
+}
 
 export const MODELS: OCRModel[] = [
   {
     name: "Tesseract (Fast, Low Accuracy)",
-    processor: createTesseractProcessor,
+    processor: tesseractProcessor,
   },
-  //   {
-  //     name: "TrOCR (Slow, High Accuracy)",
-  //     processor: createTrOCRProcessor,
-  //   },
+  // {
+  //   name: "TrOCR (Slow, High Accuracy)",
+  //   processor: trOCRProcessor,
+  // },
 ];

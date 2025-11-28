@@ -61,7 +61,7 @@ export default function OCRTool() {
         throw new Error("Selected model not found");
       }
       const processor = await model.processor();
-      const text = await processor(selectedFile);
+      const text = await processor(previewUrl);
       setExtractedText(text);
     } catch (err) {
       setError(
@@ -93,13 +93,13 @@ export default function OCRTool() {
       <div className="grid h-full grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="flex h-full flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 font-semibold text-lg text-zinc-800">
+            <h2 className="flex items-center gap-2 font-semibold text-foreground text-lg">
               <Upload className="h-4 w-4" />
               Input Image
             </h2>
             {selectedFile && (
               <Button
-                className="text-zinc-500"
+                className="text-muted-foreground"
                 onClick={clearFile}
                 size="sm"
                 variant="ghost"
@@ -110,7 +110,7 @@ export default function OCRTool() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label className="font-medium text-xs text-zinc-500 uppercase tracking-wider">
+            <Label className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
               Model
             </Label>
             <Select onValueChange={setSelectedModel} value={selectedModel}>
@@ -129,7 +129,7 @@ export default function OCRTool() {
 
           <div className="flex min-h-[300px] flex-1 flex-col gap-4">
             {previewUrl ? (
-              <div className="group relative flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-zinc-200 bg-zinc-900">
+              <div className="group relative flex flex-1 items-center justify-center overflow-hidden rounded-xl border border-border bg-card">
                 <img
                   alt="Preview"
                   className="max-h-full max-w-full object-contain"
@@ -138,7 +138,7 @@ export default function OCRTool() {
                   width={500}
                 />
                 <button
-                  className="absolute top-2 right-2 rounded-full bg-black/50 p-2 text-white opacity-0 transition-opacity hover:bg-black/70 group-hover:opacity-100"
+                  className="absolute top-2 right-2 rounded-full bg-background/80 p-2 text-foreground opacity-0 shadow-sm transition-opacity hover:bg-accent group-hover:opacity-100"
                   onClick={clearFile}
                   type="button"
                 >
@@ -147,7 +147,7 @@ export default function OCRTool() {
               </div>
             ) : (
               <button
-                className="group relative flex flex-1 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-zinc-200 border-dashed bg-zinc-50/50 transition-all hover:border-zinc-300 hover:bg-zinc-50"
+                className="group relative flex flex-1 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-border border-dashed bg-muted/30 transition-all hover:border-accent hover:bg-muted/40"
                 onClick={() => fileInputRef.current?.click()}
                 type="button"
               >
@@ -158,13 +158,13 @@ export default function OCRTool() {
                   ref={fileInputRef}
                   type="file"
                 />
-                <div className="mb-4 rounded-full bg-zinc-100 p-4 transition-transform group-hover:scale-110">
-                  <FileImage className="h-8 w-8 text-zinc-400" />
+                <div className="mb-4 rounded-full bg-muted p-4 transition-transform group-hover:scale-110">
+                  <FileImage className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <p className="font-medium text-sm text-zinc-700">
+                <p className="font-medium text-foreground text-sm">
                   Click to upload image
                 </p>
-                <p className="mt-1 text-xs text-zinc-500">
+                <p className="mt-1 text-muted-foreground text-xs">
                   JPG, JPEG, PNG, WEBP, BMP, TIFF, ICO
                 </p>
               </button>
@@ -185,7 +185,7 @@ export default function OCRTool() {
 
         <div className="flex h-full flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 font-semibold text-lg text-zinc-800">
+            <h2 className="flex items-center gap-2 font-semibold text-foreground text-lg">
               <ScanText className="h-4 w-4" />
               Extracted Text
             </h2>
@@ -193,7 +193,7 @@ export default function OCRTool() {
 
           <div className="relative flex-1">
             <textarea
-              className={`h-full w-full resize-none rounded-xl border bg-white p-6 text-zinc-800 transition-all focus:outline-none focus:ring-2 focus:ring-zinc-900/5 ${extractedText ? "border-zinc-200 shadow-sm" : "border-zinc-100 text-zinc-400"}`}
+              className={`h-full w-full resize-none rounded-xl border bg-card p-6 text-foreground transition-all focus:outline-none focus:ring-2 focus:ring-ring/40 ${extractedText ? "border-border shadow-sm" : "border-border text-muted-foreground"}`}
               placeholder={
                 isProcessing
                   ? "Analysing image..."
@@ -206,7 +206,7 @@ export default function OCRTool() {
 
             <div className="absolute top-3 right-3">
               <Button
-                className="border-zinc-200 bg-white/80 shadow-sm backdrop-blur-sm hover:bg-zinc-50"
+                className="border-border bg-background/80 shadow-sm backdrop-blur-sm hover:bg-accent"
                 disabled={!extractedText}
                 onClick={handleCopy}
                 size="sm"
@@ -222,10 +222,10 @@ export default function OCRTool() {
             </div>
 
             {isProcessing && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-white/50 backdrop-blur-sm">
+              <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-background/80 backdrop-blur-sm">
                 <div className="flex flex-col items-center gap-3">
-                  <Zap className="h-8 w-8 animate-pulse text-zinc-900" />
-                  <p className="font-medium text-sm text-zinc-600">
+                  <Zap className="h-8 w-8 animate-pulse text-primary" />
+                  <p className="font-medium text-muted-foreground text-sm">
                     Processing...
                   </p>
                 </div>
