@@ -75,15 +75,15 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-2 rounded-t-xl border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-        <div className="flex items-center gap-2 px-4">
-          <SidebarTrigger className="-ml-1" />
+      <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-2 overflow-hidden rounded-t-xl border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="flex min-w-0 flex-1 items-center gap-2 px-2 sm:px-4">
+          <SidebarTrigger className="-ml-1 shrink-0" />
           <Separator
-            className="mr-2 data-[orientation=vertical]:h-4"
+            className="mr-2 shrink-0 data-[orientation=vertical]:h-4"
             orientation="vertical"
           />
-          <Breadcrumb>
-            <BreadcrumbList>
+          <Breadcrumb className="min-w-0">
+            <BreadcrumbList className="min-w-0">
               {breadcrumb.groupLabel && (
                 <>
                   <BreadcrumbItem className="hidden md:block">
@@ -93,20 +93,22 @@ export function Header() {
                 </>
               )}
               {breadcrumb.itemTitle && (
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{breadcrumb.itemTitle}</BreadcrumbPage>
+                <BreadcrumbItem className="min-w-0">
+                  <BreadcrumbPage className="truncate">
+                    {breadcrumb.itemTitle}
+                  </BreadcrumbPage>
                 </BreadcrumbItem>
               )}
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <div className="ml-auto flex items-center gap-2 px-4">
+        <div className="ml-auto flex shrink-0 items-center gap-1 px-2 sm:gap-2 sm:px-4">
           <Button
-            className="relative h-9 w-full justify-start gap-2 text-muted-foreground sm:w-64 sm:pr-12"
+            className="relative h-9 shrink-0 justify-start gap-2 text-muted-foreground sm:w-64 sm:pr-12"
             onClick={() => setOpen(true)}
             variant="outline"
           >
-            <SearchIcon className="size-4" />
+            <SearchIcon className="size-4 shrink-0" />
             <span className="hidden sm:inline-flex">Search...</span>
             <span className="inline-flex sm:hidden">Search</span>
             <KbdGroup className="pointer-events-none absolute top-1.5 right-1.5 hidden items-center gap-1 sm:flex">
