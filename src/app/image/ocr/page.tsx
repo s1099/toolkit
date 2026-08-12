@@ -106,14 +106,44 @@ export default function OcrPage() {
           onDrop={handleDrop}
         >
           {preview ? (
-            <Image
-              alt={preview.name}
-              className="h-auto max-h-full w-auto max-w-full object-contain"
-              height={preview.height}
-              src={preview.url}
-              unoptimized
-              width={preview.width}
-            />
+            <div
+              className="relative max-h-full max-w-full"
+              style={{ aspectRatio: `${preview.width} / ${preview.height}` }}
+            >
+              <Image
+                alt={preview.name}
+                className="h-full w-full object-contain"
+                height={preview.height}
+                src={preview.url}
+                unoptimized
+                width={preview.width}
+              />
+              {result && result.lines.length > 0 && (
+                <svg
+                  // The wrapper is exactly the image's box, so the viewBox maps
+                  // 1:1 onto the coordinates the detector reported.
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 h-full w-full"
+                  preserveAspectRatio="none"
+                  viewBox={`0 0 ${preview.width} ${preview.height}`}
+                >
+                  {result.lines.map((line) => (
+                    <rect
+                      className="fill-primary/10 stroke-primary/70"
+                      height={line.box.y1 - line.box.y0}
+                      key={`${line.box.x0},${line.box.y0},${line.box.x1},${line.box.y1}`}
+                      strokeWidth={1.5}
+                      // Keeps the outline hairline-thin at any zoom, instead of
+                      // scaling with the viewBox.
+                      vectorEffect="non-scaling-stroke"
+                      width={line.box.x1 - line.box.x0}
+                      x={line.box.x0}
+                      y={line.box.y0}
+                    />
+                  ))}
+                </svg>
+              )}
+            </div>
           ) : (
             <p className="text-muted-foreground text-sm">
               Drop an image here, or choose one above.

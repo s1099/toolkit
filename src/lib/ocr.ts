@@ -369,19 +369,25 @@ export function joinLines(lines: OcrLine[]): string {
 /* Runtime                                                                     */
 /* -------------------------------------------------------------------------- */
 
+export type Backend = "webgpu" | "wasm";
+
 interface Engine {
+  backend: Backend;
   det: InferenceSession;
   dict: string[];
   rec: InferenceSession;
 }
 
 let engine: Promise<Engine> | null = null;
+// Latches once a WebGPU session has misbehaved, so a rebuild doesn't pick it
+// again for the rest of the page's life.
+let webgpuDisabled = false;
 
 export function loadOcr(
   onProgress?: (progress: LoadProgress) => void
 ): Promise<Engine> {
   engine ??= createEngine(onProgress).catch((cause: unknown) => {
-    // Don't cache the failure — a reload shouldn't need a page refresh.
+    // Don't cache the failure — a retry shouldn't need a page refresh.
     engine = null;
     throw cause;
   });
@@ -393,6 +399,7 @@ async function createEngine(
 ): Promise<Engine> {
   const ort = await import("onnxruntime-web");
   // Threads need cross-origin isolation, which a static export doesn't get.
+  // This is also the CPU fallback for ops the WebGPU EP can't take.
   ort.env.wasm.numThreads = 1;
 
   const [detBytes, recBytes, recConfig] = await Promise.all([
@@ -401,17 +408,188 @@ async function createEngine(
     download(REC_CONFIG_URL, "character dictionary", onProgress),
   ]);
 
-  const options = { executionProviders: ["wasm"] } as const;
-  const [det, rec] = await Promise.all([
-    ort.InferenceSession.create(detBytes, options),
-    ort.InferenceSession.create(recBytes, options),
-  ]);
+  const { backend, det, rec } = await createSessions(ort, detBytes, recBytes);
 
   return {
+    backend,
     det,
     dict: parseCharDict(new TextDecoder().decode(recConfig)),
     rec,
   };
+}
+
+// The trailing "wasm" keeps any op the WebGPU EP can't compile on the CPU
+// kernels instead of failing the whole session.
+const WEBGPU_PROVIDERS = ["webgpu", "wasm"] as const;
+const WASM_PROVIDERS = ["wasm"] as const;
+
+type Providers = InferenceSession.SessionOptions["executionProviders"];
+
+interface SessionPair {
+  det: InferenceSession;
+  rec: InferenceSession;
+}
+
+async function createPair(
+  ort: typeof import("onnxruntime-web"),
+  detBytes: Uint8Array,
+  recBytes: Uint8Array,
+  executionProviders: Providers
+): Promise<SessionPair> {
+  const [det, rec] = await Promise.all([
+    ort.InferenceSession.create(detBytes, { executionProviders }),
+    ort.InferenceSession.create(recBytes, { executionProviders }),
+  ]);
+  return { det, rec };
+}
+
+async function createSessions(
+  ort: typeof import("onnxruntime-web"),
+  detBytes: Uint8Array,
+  recBytes: Uint8Array
+): Promise<SessionPair & { backend: Backend }> {
+  if (!webgpuDisabled && "gpu" in navigator) {
+    const accelerated = await tryWebgpu(ort, detBytes, recBytes);
+    if (accelerated) {
+      return { backend: "webgpu", ...accelerated };
+    }
+  }
+
+  const pair = await createPair(ort, detBytes, recBytes, WASM_PROVIDERS);
+  return { backend: "wasm", ...pair };
+}
+
+/**
+ * Builds both sessions on WebGPU and proves them before handing them back. A
+ * missing adapter or an uncompilable shader throws here, but a bad kernel
+ * doesn't — it quietly returns garbage — so each session gets a probe run
+ * whose output has a known shape and range.
+ */
+async function tryWebgpu(
+  ort: typeof import("onnxruntime-web"),
+  detBytes: Uint8Array,
+  recBytes: Uint8Array
+): Promise<SessionPair | null> {
+  let pair: SessionPair | null = null;
+
+  try {
+    pair = await createPair(ort, detBytes, recBytes, WEBGPU_PROVIDERS);
+    if (await sessionsProduceSaneOutput(ort, pair.det, pair.rec)) {
+      return pair;
+    }
+  } catch {
+    // No adapter, device lost during init, or a shader that won't build.
+  }
+
+  webgpuDisabled = true;
+  await releasePair(pair);
+  return null;
+}
+
+function releasePair(pair: SessionPair | null): Promise<unknown> {
+  if (!pair) {
+    return Promise.resolve();
+  }
+  const swallow = () => undefined;
+  return Promise.all([
+    pair.det.release().catch(swallow),
+    pair.rec.release().catch(swallow),
+  ]);
+}
+
+// Small enough to be instant; the recognition probe uses the real 48x320 shape
+// so its shaders are already compiled when the first crop arrives.
+const PROBE_SIDE = 64;
+const PROBE_TOLERANCE = 1e-3;
+
+/**
+ * A deterministic ramp over the range normalisation actually produces. Zeros
+ * would be a weak probe: with no signal to carry, a convolution that dropped
+ * its input entirely still emits its bias and looks healthy.
+ */
+function probeInput(length: number): Float32Array {
+  const values = new Float32Array(length);
+  for (let index = 0; index < length; index += 1) {
+    values[index] = ((index % BYTE_MAX) / BYTE_MAX - 0.5) * 2;
+  }
+  return values;
+}
+
+async function sessionsProduceSaneOutput(
+  ort: typeof import("onnxruntime-web"),
+  det: InferenceSession,
+  rec: InferenceSession
+): Promise<boolean> {
+  const detShape = [1, 3, PROBE_SIDE, PROBE_SIDE] as const;
+  const detOutput = await det.run({
+    [det.inputNames[0]]: new ort.Tensor(
+      "float32",
+      probeInput(3 * PROBE_SIDE * PROBE_SIDE),
+      detShape
+    ),
+  });
+  // The DB head ends in a sigmoid, so every value must be a probability.
+  if (!looksSane(detOutput[det.outputNames[0]].data, 1)) {
+    return false;
+  }
+
+  const recShape = [1, 3, REC_HEIGHT, REC_BASE_WIDTH] as const;
+  const recOutput = await rec.run({
+    [rec.inputNames[0]]: new ort.Tensor(
+      "float32",
+      probeInput(3 * REC_HEIGHT * REC_BASE_WIDTH),
+      recShape
+    ),
+  });
+  // No range bound here — ctcDecode tolerates a logits export, so the probe
+  // must too. Finite and non-empty is the real signal.
+  return looksSane(recOutput[rec.outputNames[0]].data, null);
+}
+
+/**
+ * Rejects the ways a broken GPU kernel actually fails: NaN/Infinity, values
+ * outside a bounded activation's range, and an all-zero buffer that was never
+ * written to. Both heads end in sigmoid/softmax, neither of which can emit an
+ * exact zero, so an all-zero output means nothing ran.
+ */
+function looksSane(data: unknown, max: number | null): boolean {
+  if (!(data instanceof Float32Array) || data.length === 0) {
+    return false;
+  }
+
+  let nonZero = false;
+  for (const value of data) {
+    if (!Number.isFinite(value)) {
+      return false;
+    }
+    const outOfRange =
+      max !== null &&
+      (value < -PROBE_TOLERANCE || value > max + PROBE_TOLERANCE);
+    if (outOfRange) {
+      return false;
+    }
+    if (value !== 0) {
+      nonZero = true;
+    }
+  }
+  return nonZero;
+}
+
+/**
+ * Drops a WebGPU engine after it failed mid-run — a lost device or a shape
+ * whose shaders won't build — so the caller can retry on CPU. The models come
+ * straight back out of Cache Storage, so rebuilding is cheap.
+ */
+async function downgradeToWasm(): Promise<boolean> {
+  const active = await engine?.catch(() => null);
+  if (webgpuDisabled || active?.backend !== "webgpu") {
+    return false;
+  }
+
+  webgpuDisabled = true;
+  engine = null;
+  await releasePair(active);
+  return true;
 }
 
 const MODEL_CACHE = "ocr-models";
@@ -606,6 +784,22 @@ export async function runOcr(
     return { lines: [], text: "" };
   }
 
+  try {
+    return await read(image, onProgress);
+  } catch (cause) {
+    // A GPU device can be lost long after the session was proved good. Rebuild
+    // on CPU and read the image again rather than surfacing that to the user.
+    if (await downgradeToWasm()) {
+      return await read(image, onProgress);
+    }
+    throw cause;
+  }
+}
+
+async function read(
+  image: ImageBitmap,
+  onProgress?: (progress: LoadProgress) => void
+): Promise<OcrResult> {
   const { det, rec, dict } = await loadOcr(onProgress);
   const { Tensor } = await import("onnxruntime-web");
 
