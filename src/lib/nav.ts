@@ -1,80 +1,32 @@
-import {
-  FileTextIcon,
-  ImageMinusIcon,
-  type LucideIcon,
-  MaximizeIcon,
-  MicIcon,
-  Volume2Icon,
-} from "lucide-react";
+import { Image01Icon, ScanImageIcon } from "@hugeicons/core-free-icons";
+import type { IconSvgElement } from "@hugeicons/react";
 
-export type RouteGroup = {
-  label: string;
-  items: {
-    title: string;
-    slug: string;
-    icon: LucideIcon;
-  }[];
-};
+export interface Tool {
+  href: string;
+  icon: IconSvgElement;
+  name: string;
+}
 
-export const navGroups: RouteGroup[] = [
+export interface Category {
+  icon: IconSvgElement;
+  name: string;
+  tools: Tool[];
+}
+
+export const categories: Category[] = [
   {
-    label: "Image",
-    items: [
-      {
-        title: "OCR",
-        slug: "ocr",
-        icon: FileTextIcon,
-      },
-      {
-        title: "Upscale",
-        slug: "upscale",
-        icon: MaximizeIcon,
-      },
-      {
-        title: "Remove Background",
-        slug: "remove-bg",
-        icon: ImageMinusIcon,
-      },
-      // {
-      //   title: "Remove Watermark",
-      //   slug: "remove-watermark",
-      //   icon: SparklesIcon,
-      // },
-    ],
+    icon: Image01Icon,
+    name: "Image",
+    tools: [{ href: "/image/ocr", icon: ScanImageIcon, name: "OCR" }],
   },
-  {
-    label: "Audio",
-    items: [
-      {
-        title: "Transcribe",
-        slug: "transcribe",
-        icon: MicIcon,
-      },
-      {
-        title: "TTS",
-        slug: "tts",
-        icon: Volume2Icon,
-      },
-    ],
-  },
-  {
-    label: "Text",
-    items: [
-      {
-        title: "Summarize",
-        slug: "summarize",
-        icon: FileTextIcon,
-      },
-    ],
-  },
-  //   {
-  //     label: "Misc",
-  //     items: [
-  //       {
-  //         title: "Shader Playground",
-  //         slug: "shader-playground",
-  //         icon: BoxIcon,
-  //       },
-  //     ],
-  //   },
 ];
+
+export function findTool(pathname: string) {
+  for (const category of categories) {
+    const tool = category.tools.find((t) => t.href === pathname);
+    if (tool) {
+      return { category, tool };
+    }
+  }
+  return null;
+}

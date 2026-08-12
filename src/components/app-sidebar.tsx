@@ -1,5 +1,9 @@
-import { ToolCaseIcon } from "lucide-react";
+"use client";
+
+import { ToolsIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -11,39 +15,38 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { navGroups } from "@/lib/nav";
+import { categories } from "@/lib/nav";
 
 export function AppSidebar() {
+  const pathname = usePathname();
+
   return (
-    <Sidebar collapsible="icon" side="left" variant="inset">
-      <SidebarHeader>
-        <Link href="/">
-          <SidebarMenuButton
-            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            size="lg"
-          >
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-              <ToolCaseIcon />
-            </div>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">Toolkit</span>
-            </div>
-          </SidebarMenuButton>
-        </Link>
+    <Sidebar collapsible="icon" variant="inset">
+      <SidebarHeader className="h-12 justify-center">
+        <div className="flex items-center gap-2.5 px-1 group-data-[collapsible=icon]:px-0">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+            <HugeiconsIcon icon={ToolsIcon} size={18} strokeWidth={2} />
+          </div>
+          <span className="truncate font-heading font-semibold text-base tracking-tight group-data-[collapsible=icon]:hidden">
+            Toolkit
+          </span>
+        </div>
       </SidebarHeader>
       <SidebarContent>
-        {navGroups.map((group) => (
-          <SidebarGroup key={group.label}>
-            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+        {categories.map((category) => (
+          <SidebarGroup key={category.name}>
+            <SidebarGroupLabel>{category.name}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title}>
-                      <Link href={`/${group.label.toLowerCase()}/${item.slug}`}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
+                {category.tools.map((tool) => (
+                  <SidebarMenuItem key={tool.href}>
+                    <SidebarMenuButton
+                      isActive={pathname === tool.href}
+                      render={<Link href={tool.href} />}
+                      tooltip={tool.name}
+                    >
+                      <HugeiconsIcon icon={tool.icon} strokeWidth={2} />
+                      <span>{tool.name}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
