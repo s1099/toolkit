@@ -43,11 +43,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       )}
       lang="en"
     >
-      <body className="flex min-h-full flex-col">
+      <body className="flex h-full flex-col overflow-hidden">
         <TooltipProvider>
-          <SidebarProvider>
+          <SidebarProvider className="h-svh overflow-hidden">
             <AppSidebar />
-            <SidebarInset>
+            <SidebarInset className="min-h-0 overflow-hidden">
               <Header />
               {children}
             </SidebarInset>
