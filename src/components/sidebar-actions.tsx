@@ -8,6 +8,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
+import { flushSync } from "react-dom";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -53,9 +54,22 @@ const THEME_ICON = {
 
 export function SidebarActions() {
   const { resolvedTheme, setTheme } = useTheme();
-  // Only read on click, by which point the client has long since resolved it.
-  const toggleTheme = () =>
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+
+  // resolvedTheme is only read on click, by which point the client has long
+  // since resolved it.
+  const toggleTheme = () => {
+    const next = resolvedTheme === "dark" ? "light" : "dark";
+    // next-themes swaps the class from an effect, so the update has to be
+    // flushed inside the callback — the browser captures the "after" state the
+    // moment it returns, and a state update still in React's queue would miss it.
+    const apply = () => flushSync(() => setTheme(next));
+
+    if ("startViewTransition" in document) {
+      document.startViewTransition(apply);
+      return;
+    }
+    apply();
+  };
 
   return (
     <SidebarMenu>
