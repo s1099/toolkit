@@ -45,7 +45,10 @@ export function Header() {
   return (
     <header className="flex h-12 shrink-0 items-center gap-2 border-b px-3">
       <SidebarTrigger />
-      <Separator className="h-4!" orientation="vertical" />
+      <Separator
+        className="data-vertical:h-4 data-vertical:self-center"
+        orientation="vertical"
+      />
       <Breadcrumb>
         <BreadcrumbList>
           {match ? (
@@ -70,13 +73,13 @@ export function Header() {
         variant="outline"
       >
         <HugeiconsIcon icon={Search01Icon} strokeWidth={2} />
-        Search tools...
+        Search...
         <kbd className="ml-auto text-xs tracking-widest">Ctrl K</kbd>
       </Button>
 
       <CommandDialog onOpenChange={setOpen} open={open}>
         <Command>
-          <CommandInput placeholder="Search tools..." />
+          <CommandInput placeholder="Search..." />
           <CommandList>
             <CommandEmpty>No tools found.</CommandEmpty>
             {categories.map((category) => (
