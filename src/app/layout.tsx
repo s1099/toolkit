@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Figtree, Geist, Geist_Mono, Instrument_Sans } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Header } from "@/components/header";
@@ -25,7 +26,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  description: "Local tools for regular use",
+  description: "",
   title: "Toolkit",
 };
 
@@ -42,17 +43,22 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         instrumentSansHeading.variable
       )}
       lang="en"
+      // next-themes writes the theme class here before paint, so the server's
+      // markup for this element is expected not to match.
+      suppressHydrationWarning
     >
       <body className="flex h-full flex-col overflow-hidden">
-        <TooltipProvider>
-          <SidebarProvider className="h-svh overflow-hidden">
-            <AppSidebar />
-            <SidebarInset className="min-h-0 overflow-hidden">
-              <Header />
-              {children}
-            </SidebarInset>
-          </SidebarProvider>
-        </TooltipProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <TooltipProvider>
+            <SidebarProvider className="h-svh overflow-hidden">
+              <AppSidebar />
+              <SidebarInset className="min-h-0 overflow-hidden">
+                <Header />
+                {children}
+              </SidebarInset>
+            </SidebarProvider>
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

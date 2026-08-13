@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["1c80-103-211-18-78.ngrok-free.app"],
   basePath: "/toolkit",
   images: { unoptimized: true },
   output: "export",

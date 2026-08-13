@@ -74,7 +74,9 @@ export function Header() {
       >
         <HugeiconsIcon icon={Search01Icon} strokeWidth={2} />
         Search...
-        <kbd className="ml-auto text-xs tracking-widest">Ctrl K</kbd>
+        <kbd className="ml-auto text-xs tracking-widest max-md:hidden">
+          Ctrl K
+        </kbd>
       </Button>
 
       <CommandDialog onOpenChange={setOpen} open={open}>

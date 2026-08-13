@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import type { LoadProgress, OcrResult } from "@/lib/ocr";
 
+// TODO: Investigate why det bounding boxes arent sometimes rendering on chrome android
+
 type Preview = { url: string; width: number; height: number; name: string };
 
 const PERCENT = 100;
@@ -187,7 +189,7 @@ export default function OcrPage() {
 
         <Textarea
           className="min-h-48 flex-1 resize-none font-mono text-sm"
-          placeholder="Text from the image shows up here."
+          placeholder="Upload an image to see result here."
           readOnly
           value={result?.text ?? ""}
         />

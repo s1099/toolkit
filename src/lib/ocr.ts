@@ -451,7 +451,7 @@ async function createSessions(
   if (!webgpuDisabled && "gpu" in navigator) {
     const accelerated = await tryWebgpu(ort, detBytes, recBytes);
     if (accelerated) {
-      return { backend: "webgpu", ...accelerated };
+      return accelerated;
     }
   }
 
@@ -460,30 +460,42 @@ async function createSessions(
 }
 
 /**
- * Builds both sessions on WebGPU and proves them before handing them back. A
- * missing adapter or an uncompilable shader throws here, but a bad kernel
- * doesn't — it quietly returns garbage — so each session gets a probe run
- * whose output has a known shape and range.
+ * Builds the sessions on WebGPU and only keeps them if they agree with the CPU.
+ * A missing adapter or an uncompilable shader throws here, but a driver whose
+ * kernels are subtly wrong doesn't — it returns numbers that pass every check
+ * that looks at one output alone. The detection head ends in a sigmoid, so even
+ * pure garbage arrives as a valid-looking probability map; the only difference
+ * a self-consistent output has left to show is that detection finds no text and
+ * recognition decodes noise. Several mobile GPU drivers are known to do exactly
+ * this, so the CPU pair is built either way and the GPU has to match it.
  */
 async function tryWebgpu(
   ort: typeof import("onnxruntime-web"),
   detBytes: Uint8Array,
   recBytes: Uint8Array
-): Promise<SessionPair | null> {
-  let pair: SessionPair | null = null;
-
+): Promise<(SessionPair & { backend: Backend }) | null> {
+  let gpu: SessionPair | null = null;
   try {
-    pair = await createPair(ort, detBytes, recBytes, WEBGPU_PROVIDERS);
-    if (await sessionsProduceSaneOutput(ort, pair.det, pair.rec)) {
-      return pair;
-    }
+    gpu = await createPair(ort, detBytes, recBytes, WEBGPU_PROVIDERS);
   } catch {
     // No adapter, device lost during init, or a shader that won't build.
+    webgpuDisabled = true;
+    return null;
+  }
+
+  const cpu = await createPair(ort, detBytes, recBytes, WASM_PROVIDERS);
+  try {
+    if (await pairsAgree(ort, gpu, cpu)) {
+      await releasePair(cpu);
+      return { backend: "webgpu", ...gpu };
+    }
+  } catch {
+    // Device lost mid-probe; the CPU pair below is already built.
   }
 
   webgpuDisabled = true;
-  await releasePair(pair);
-  return null;
+  await releasePair(gpu);
+  return { backend: "wasm", ...cpu };
 }
 
 function releasePair(pair: SessionPair | null): Promise<unknown> {
@@ -500,7 +512,10 @@ function releasePair(pair: SessionPair | null): Promise<unknown> {
 // Small enough to be instant; the recognition probe uses the real 48x320 shape
 // so its shaders are already compiled when the first crop arrives.
 const PROBE_SIDE = 64;
-const PROBE_TOLERANCE = 1e-3;
+// GPU and CPU sum convolutions in different orders, so they never match to the
+// last bit. Deep enough to matter, loose enough that a genuinely broken kernel —
+// which misses by whole orders of magnitude, not by rounding — can't sneak past.
+const AGREEMENT_TOLERANCE = 0.02;
 
 /**
  * A deterministic ramp over the range normalisation actually produces. Zeros
@@ -515,57 +530,76 @@ function probeInput(length: number): Float32Array {
   return values;
 }
 
-async function sessionsProduceSaneOutput(
+/** Both heads have to reproduce the CPU's answer, at the shapes they run at. */
+async function pairsAgree(
   ort: typeof import("onnxruntime-web"),
-  det: InferenceSession,
-  rec: InferenceSession
+  gpu: SessionPair,
+  cpu: SessionPair
 ): Promise<boolean> {
-  const detShape = [1, 3, PROBE_SIDE, PROBE_SIDE] as const;
-  const detOutput = await det.run({
-    [det.inputNames[0]]: new ort.Tensor(
-      "float32",
-      probeInput(3 * PROBE_SIDE * PROBE_SIDE),
-      detShape
-    ),
-  });
-  // The DB head ends in a sigmoid, so every value must be a probability.
-  if (!looksSane(detOutput[det.outputNames[0]].data, 1)) {
+  const detMatches = await outputsMatch(ort, gpu.det, cpu.det, [
+    1,
+    3,
+    PROBE_SIDE,
+    PROBE_SIDE,
+  ]);
+  if (!detMatches) {
     return false;
   }
+  return await outputsMatch(ort, gpu.rec, cpu.rec, [
+    1,
+    3,
+    REC_HEIGHT,
+    REC_BASE_WIDTH,
+  ]);
+}
 
-  const recShape = [1, 3, REC_HEIGHT, REC_BASE_WIDTH] as const;
-  const recOutput = await rec.run({
-    [rec.inputNames[0]]: new ort.Tensor(
-      "float32",
-      probeInput(3 * REC_HEIGHT * REC_BASE_WIDTH),
-      recShape
-    ),
-  });
-  // No range bound here — ctcDecode tolerates a logits export, so the probe
-  // must too. Finite and non-empty is the real signal.
-  return looksSane(recOutput[rec.outputNames[0]].data, null);
+/** Runs one probe through both sessions and compares the outputs elementwise. */
+async function outputsMatch(
+  ort: typeof import("onnxruntime-web"),
+  gpu: InferenceSession,
+  cpu: InferenceSession,
+  dims: number[]
+): Promise<boolean> {
+  const length = dims.reduce((total, dim) => total * dim, 1);
+  // A tensor hands its buffer to the runtime, so each session gets its own.
+  const run = async (session: InferenceSession) => {
+    const outputs = await session.run({
+      [session.inputNames[0]]: new ort.Tensor(
+        "float32",
+        probeInput(length),
+        dims
+      ),
+    });
+    return outputs[session.outputNames[0]].data;
+  };
+
+  return close(await run(gpu), await run(cpu));
 }
 
 /**
- * Rejects the ways a broken GPU kernel actually fails: NaN/Infinity, values
- * outside a bounded activation's range, and an all-zero buffer that was never
- * written to. Both heads end in sigmoid/softmax, neither of which can emit an
- * exact zero, so an all-zero output means nothing ran.
+ * Rejects everything a broken kernel produces: a wrong shape, NaN/Infinity, an
+ * all-zero buffer that was never written to, and values that simply don't match
+ * what the same graph computes on the CPU. Both heads end in sigmoid/softmax,
+ * neither of which can emit an exact zero, so all-zero means nothing ran.
  */
-function looksSane(data: unknown, max: number | null): boolean {
-  if (!(data instanceof Float32Array) || data.length === 0) {
+function close(actual: unknown, expected: unknown): boolean {
+  if (!(actual instanceof Float32Array && expected instanceof Float32Array)) {
+    return false;
+  }
+  if (actual.length === 0 || actual.length !== expected.length) {
     return false;
   }
 
   let nonZero = false;
-  for (const value of data) {
+  for (const [index, value] of actual.entries()) {
     if (!Number.isFinite(value)) {
       return false;
     }
-    const outOfRange =
-      max !== null &&
-      (value < -PROBE_TOLERANCE || value > max + PROBE_TOLERANCE);
-    if (outOfRange) {
+    const reference = expected[index];
+    // Relative, so the bound still means something for a logits export whose
+    // values aren't confined to [0, 1].
+    const allowed = AGREEMENT_TOLERANCE * (1 + Math.abs(reference));
+    if (Math.abs(value - reference) > allowed) {
       return false;
     }
     if (value !== 0) {

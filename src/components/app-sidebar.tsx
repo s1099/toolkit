@@ -4,9 +4,11 @@ import { ToolsIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SidebarActions } from "@/components/sidebar-actions";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -55,6 +57,9 @@ export function AppSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarActions />
+      </SidebarFooter>
     </Sidebar>
   );
 }
