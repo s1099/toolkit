@@ -148,7 +148,7 @@ export default function OcrPage() {
             </div>
           ) : (
             <p className="text-muted-foreground text-sm">
-              Drop an image here, or choose one above.
+              Drop an image here or choose one.
             </p>
           )}
         </div>
@@ -189,7 +189,7 @@ export default function OcrPage() {
 
         <Textarea
           className="min-h-48 flex-1 resize-none font-mono text-sm"
-          placeholder="Upload an image to see result here."
+          placeholder="..."
           readOnly
           value={result?.text ?? ""}
         />
